@@ -1,10 +1,45 @@
-import os
-import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from config import save_config, set_date
 
 DATE_FORMAT = "%Y-%m-%d"
+
+PRESETS = {
+    "1": ("Last 3 days",  timedelta(days=3)),
+    "2": ("Last week",    timedelta(weeks=1)),
+    "3": ("Last 2 weeks", timedelta(weeks=2)),
+    "4": ("Last month",   timedelta(days=30)),
+}
+
+
+def pick_date(config):
+    """Let the user choose a preset range, custom date, or use the saved date."""
+    last_date = config.get("last_date")
+
+    print("\nPick a time range:")
+    for key, (label, _) in PRESETS.items():
+        print(f"  {key} - {label}")
+    print(f"  5 - Custom date (YYYY-MM-DD)")
+    if last_date:
+        print(f"  0 - Since last check ({last_date})")
+
+    while True:
+        choice = input("Select: ").strip()
+
+        if choice == "0" and last_date:
+            return input_date(config, last_date)
+
+        if choice in PRESETS:
+            _, delta = PRESETS[choice]
+            cutoff = datetime.now(timezone.utc) - delta
+            raw = cutoff.strftime(DATE_FORMAT)
+            set_date(config, raw)
+            return cutoff, raw
+
+        if choice == "5":
+            return input_date(config)
+
+        print("Invalid choice, try again.")
 
 
 def input_date(config, last_date=None):
@@ -29,13 +64,3 @@ def add_channel(config):
     config["channels"].append(channel)
     save_config(config)
     print("Channel added.")
-
-
-def read_channels(filepath: str) -> list[str]:
-    """Read channel URLs from a text file, one per line."""
-    if not os.path.exists(filepath):
-        print(f"Error: File '{filepath}' not found.")
-        sys.exit(1)
-    with open(filepath, "r") as f:
-        lines = [line.strip() for line in f if line.strip()]
-    return [line for line in lines if not line.startswith("#")]

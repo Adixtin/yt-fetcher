@@ -1,13 +1,17 @@
+import json
+from datetime import timezone
 import os
 import re
 import sys
 from datetime import datetime
+# pyrefly: ignore [missing-import]
 from googleapiclient.errors import HttpError
 import yt_dlp
+# pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 
 load_dotenv()
-API_KEY = os.getenv("YOUTUBE_API_KEY")
+API_KEY = os.getenv("API_KEY")
 
 
 def check_api_key():
@@ -15,6 +19,13 @@ def check_api_key():
         print("Error: No API key found.")
         print("Set it up inside your .env")
         sys.exit(1)
+
+
+def build_youtube_client(api_key=None):
+    """Build and return a YouTube Data API v3 service object."""
+    # pyrefly: ignore [missing-import]
+    from googleapiclient.discovery import build
+    return build("youtube", "v3", developerKey=api_key or API_KEY)
 
 
 def parse_duration(iso_duration: str) -> str:
@@ -111,7 +122,7 @@ def get_videos_after_date(youtube, playlist_id: str, after: datetime) -> list[di
             raw_date = snippet.get("publishedAt", "")
             published = datetime.fromisoformat(raw_date.replace("Z", "+00:00"))
 
-            if published <= after:
+            if published < after:
                 stop_early = True
                 continue
 
@@ -137,3 +148,12 @@ def download_video(url, output_path="./downloads"):
     }
     with yt_dlp.YoutubeDL(options) as ydl:
         ydl.download([url])
+
+def set_current_date():
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    with open("./config.json", "r") as f:
+        config = json.load(f)
+    config["last_date"] = now
+    with open("./config.json", "w") as f:
+        json.dump(config, f, indent=4)
+    print(f"Set last date to {now}")
