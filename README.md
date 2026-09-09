@@ -105,4 +105,3 @@ Videos found after the cutoff are shown one at a time; type `y` to download each
 - The `.env` file holds your API key and is git-ignored — never commit it.
 - `download_path` defaults to `./videos` (or `./downloads` if unset).
 - SponsorBlock cutting requires `ffmpeg` to be installed.
-```
