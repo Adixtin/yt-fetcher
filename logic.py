@@ -144,7 +144,7 @@ def get_videos_after_date(youtube, playlist_id: str, after: datetime) -> list[di
 def download_video(url, output_path="./downloads"):
     options = {
         'outtmpl': f'{output_path}/%(title)s.%(ext)s',
-        'format': 'best',
+        'format': 'bestvideo*+bestaudio/best',
     }
     with yt_dlp.YoutubeDL(options) as ydl:
         ydl.download([url])

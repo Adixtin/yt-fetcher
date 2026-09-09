@@ -13,7 +13,7 @@ from logic import (
 )
 
 
-def fetch_and_show(youtube, channels, cutoff, raw):
+def fetch_and_show(youtube, channels, cutoff, raw, config):
     print(f"\nLoaded {len(channels)} channel(s)\n")
     print("=" * 60)
 
@@ -45,8 +45,8 @@ def fetch_and_show(youtube, channels, cutoff, raw):
             print(f"Found {len(videos)} video(s) after {raw}:\n")
             for video in videos:
                 print_video(video)
-                if input("Download Y/n: ") in ("Y", "y", ""):
-                    download_video(video['url'])
+                if input("Download y/N: ").strip().lower() == "y":
+                    download_video(video['url'], config.get("download_path", "./downloads"))
 
     print("=" * 60)
     print("Done.")
@@ -73,7 +73,7 @@ def main():
         match int(choice):
             case 0:
                 cutoff, raw = pick_date(config)
-                fetch_and_show(youtube, config["channels"], cutoff, raw)
+                fetch_and_show(youtube, config["channels"], cutoff, raw, config)
                 set_current_date()
                 break
             case 1:

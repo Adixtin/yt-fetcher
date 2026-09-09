@@ -11,7 +11,8 @@ def load_config():
 
     return {
         "last_date": None,
-        "channels": []
+        "channels": [],
+        "download_path": "./downloads"
     }
 
 
